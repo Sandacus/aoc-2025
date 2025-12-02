@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn part_one_example_input() {
-        let input = fs::read_to_string("data/examples/01.txt")
+        let input = fs::read_to_string("]data/examples/01.txt")
         .expect("Should have been able to read the file");
         assert_eq!(part_one(&input), (3, 32));
     }

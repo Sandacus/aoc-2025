@@ -6,9 +6,9 @@ fn main() {
     let input = fs::read_to_string("data/inputs/02.txt")
         .expect("Should have been able to read the file");
     
-    let (part1) = day02::part_one(&input);
+    let part1 = day02::part_one(&input);
     println!("part 1 ans: {}", part1);
 
-    let (part2) = day02::part_two(&input);
-    println!("part 2 ans: {}", part2);
+    // let part2 = day02::part_two(&input);
+    // println!("part 2 ans: {}", part2);
 }
