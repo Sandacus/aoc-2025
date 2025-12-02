@@ -1,4 +1,4 @@
-// day 1 solution binary
+// day 1 solution
 
 pub fn part_one(input: &str) -> (u32, u32) {
     println!("Solving part 1!");
@@ -63,11 +63,8 @@ pub fn part_two(input: &str) -> (u32, u32) {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::fs;
-
-    use crate::day01::{part_one, part_two};
-
-    // use super::*;
 
     #[test]
     fn read_example() {
