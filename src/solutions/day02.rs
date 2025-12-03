@@ -1,5 +1,6 @@
 // day 2 solution
 
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
 
@@ -17,6 +18,7 @@ pub fn part_one(input: &str) -> u64 {
     count
 }
 
+#[allow(dead_code)]
 fn count_doubles(rng: &str) -> u64 {
     let rng: Vec<&str> = rng.split("-").collect();
     let start = rng[0].parse::<u64>().unwrap();
@@ -40,6 +42,7 @@ fn count_doubles(rng: &str) -> u64 {
     count
 }
 
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 
@@ -71,6 +74,7 @@ pub fn part_two(input: &str) -> u64 {
     count
 }
 
+#[allow(dead_code)]
 fn count_repeats(rng: &str) -> u64 {
     let rng: Vec<&str> = rng.split("-").collect();
     let start = rng[0].parse::<u64>().unwrap();
