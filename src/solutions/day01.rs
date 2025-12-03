@@ -1,5 +1,6 @@
 // day 1 solution
 
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> (u32, u32) {
     println!("Solving part 1!");
 
@@ -26,6 +27,7 @@ pub fn part_one(input: &str) -> (u32, u32) {
     (count, position)
 }
 
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> (u32, u32) {
     println!("Solving part 2!");
 
