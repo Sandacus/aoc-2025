@@ -1,5 +1,6 @@
 // day 3 solution
 
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
     
@@ -49,7 +50,7 @@ fn find_2_battery_joltage(input: &str) -> u64 {
     num.parse::<u64>().unwrap()
 }
 
-
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 
