@@ -1,0 +1,48 @@
+// day 5 solution
+
+pub fn part_one(_input: &str) -> u64 {
+    println!("Solving part 1!");
+    
+    42
+}
+
+
+pub fn part_two(_input: &str) -> u64 {
+    println!("Solving part 2!");
+    
+    42    
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn read_input() {
+        assert!(fs::exists("data/inputs/05.txt").expect("couldn't find input"));
+    }
+
+    #[test]
+    fn read_example() {
+        assert!(fs::exists("data/examples/05.txt").expect("couldn't find example"));
+    }
+
+    #[test]
+    fn part_one_example_input() {
+        let input = fs::read_to_string("data/examples/05.txt")
+        .expect("Should have been able to read the file");
+        assert_eq!(part_one(&input), 13);
+    }
+
+
+    #[test]
+    fn part_two_example_input() {
+        let input = fs::read_to_string("data/examples/05.txt")
+        .expect("Should have been able to read the file");
+        assert_eq!(part_two(&input), 43);
+    }
+
+
+}

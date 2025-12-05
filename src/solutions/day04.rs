@@ -1,5 +1,6 @@
 // day 4 solution
 
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
     
@@ -138,7 +139,7 @@ fn check_down_left(i: usize, j: usize, arr: &[Vec<char>]) -> u64 {
     0
 }
 
-
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
     
