@@ -155,7 +155,7 @@ pub fn part_two(input: &str) -> u64 {
     let mut accessible: u64 = 0;
     let mut found_paper = true;
     while found_paper {
-        let (paper_removed, flag) = find_accessible(accessible, &mut arr);
+        let (paper_removed, flag) = find_accessible(&mut arr);
         accessible += paper_removed;
         found_paper = flag;
         println!("{:?}", (paper_removed, flag));
@@ -165,7 +165,7 @@ pub fn part_two(input: &str) -> u64 {
     accessible
 }
 
-fn find_accessible(count: u64, arr: &mut[Vec<char>]) -> (u64, bool) {
+fn find_accessible(arr: &mut[Vec<char>]) -> (u64, bool) {
     let mut paper_removed = false;
     let mut accessible: u64 = 0;
     // loop through array
