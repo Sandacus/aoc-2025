@@ -2,6 +2,7 @@
 
 use std::collections::VecDeque;
 
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
 
@@ -47,7 +48,7 @@ pub fn part_one(input: &str) -> u64 {
     fresh_count
 }
 
-
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 

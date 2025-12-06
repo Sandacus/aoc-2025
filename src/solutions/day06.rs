@@ -1,6 +1,6 @@
 // day 6 solution
 
-use std::collections::VecDeque;
+use std::collections::HashMap;
 
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
@@ -8,35 +8,44 @@ pub fn part_one(input: &str) -> u64 {
     // parse input
     let lines = input.lines().collect::<Vec<&str>>();
 
-    let available_ids_str: Vec<&&str> = lines
-        .iter()
-        .filter(|x| !x.contains("-") && !x.is_empty())
-        .collect::<Vec<&&str>>();
+    // create hashmap of vectors with numbers and math operator
+    let mut maths: HashMap<usize, Vec<&str>> = HashMap::new();
 
-    let available_ids: Vec<u64> = available_ids_str
-        .iter()
-        .map(|x| x.parse().unwrap())
-        .collect();
+    for line in lines {
+        for (idx, item) in line.split(" ").filter(|x| !x.is_empty()).enumerate() {
+            if let Some(vec) = maths.get_mut(&idx) {
+                vec.push(item);
+            } else {
+                let vec = vec![item];
+                maths.insert(idx, vec);
+            }
+        }
+    }
 
-    42
+    // take a peek at the hashamp
+    // println!("{:?}", maths);
+
+    // loop through hashmap and count
+    let mut total = 0;
+    for (_, v) in maths {
+        if v[v.len()-1] == "*" {
+            // get product
+            let prod = v.iter().filter_map(|x| x.parse::<u64>().ok());
+            total += prod.product::<u64>();
+        } else if v[v.len()-1] == "+" {
+            // get sum
+            let sum = v.iter().filter_map(|x| x.parse::<u64>().ok());
+            total += sum.sum::<u64>();
+        }
+    }
+
+
+    total
 }
 
 
-pub fn part_two(input: &str) -> u64 {
+pub fn part_two(_input: &str) -> u64 {
     println!("Solving part 2!");
-
-    // parse input
-    let lines = input.lines().collect::<Vec<&str>>();
-
-    let mut fresh_id_rngs: Vec<(u64, u64)> = lines
-        .clone()
-        .iter()
-        .filter(|x| x.contains("-"))
-        .map(|x| x.split_once("-").unwrap())
-        .collect::<Vec<(&str, &str)>>()
-        .iter()
-        .map(|(x, y)| (x.parse().unwrap(), y.parse().unwrap()))
-        .collect();
 
    42
 }
