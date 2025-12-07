@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
 
@@ -43,7 +44,7 @@ pub fn part_one(input: &str) -> u64 {
     total
 }
 
-
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 
@@ -134,6 +135,7 @@ pub fn part_two(input: &str) -> u64 {
    count
 }
 
+#[allow(dead_code)]
 fn convert_numbers(input: &Vec<String>) -> Vec<u64> {
     // println!("Vec: {:?}", input);
     let num_digits = input[0].len();
