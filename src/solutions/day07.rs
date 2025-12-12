@@ -1,5 +1,6 @@
 // day 7 solution
 
+#[warn(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
 
@@ -49,6 +50,7 @@ pub fn part_one(input: &str) -> u64 {
     count
 }
 
+#[warn(dead_code)]
 fn find_start(line: &[char]) -> Result<usize, String> {
     for (idx, ch) in line.iter().enumerate() {
         if *ch == 'S' {
@@ -58,6 +60,7 @@ fn find_start(line: &[char]) -> Result<usize, String> {
     Err("Couldn't find start point".to_string())
 }
 
+#[warn(dead_code)]
 fn beam_down(ids: Vec<usize>, mut line: Vec<char>) -> Vec<char> {
     // --> beam down updates 
     // ----> free space: '.' to '|' 
@@ -82,7 +85,7 @@ fn beam_down(ids: Vec<usize>, mut line: Vec<char>) -> Vec<char> {
     line
 }
 
-
+#[warn(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 
@@ -128,6 +131,7 @@ pub fn part_two(input: &str) -> u64 {
     beam_count
 }
 
+#[warn(dead_code)]
 fn beam_down_count(ids: Vec<usize>, mut line: Vec<char>) -> (Vec<char>, u64) {
     // --> beam down updates 
     // ----> free space: '.' to '|' 

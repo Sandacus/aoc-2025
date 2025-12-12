@@ -1,7 +1,5 @@
 // day 5 solution
 
-use std::collections::VecDeque;
-
 #[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
@@ -48,6 +46,45 @@ pub fn part_one(input: &str) -> u64 {
     fresh_count
 }
 
+#[derive(Debug)]
+#[derive(Clone, Copy)]
+struct IdRange {
+    start: u64,
+    end: u64
+}
+
+fn filter_ranges(mut fresh_ids: Vec<IdRange>) -> (Vec<IdRange>, bool) {
+    let mut overlaps_found = false;
+    // filter out overlaps
+    for i in 1..fresh_ids.len() {
+        if fresh_ids[i].start <= fresh_ids[i-1].end
+        && fresh_ids[i].end <= fresh_ids[i-1].end {
+            overlaps_found = true;
+            // replace current range i with range from i-1
+            fresh_ids[i].start = fresh_ids[i-1].start;
+            fresh_ids[i].end = fresh_ids[i-1].end;
+            fresh_ids[i-1].start = 0;
+            fresh_ids[i-1].end = 0;
+        } else if fresh_ids[i].start <= fresh_ids[i-1].end
+        && fresh_ids[i].end > fresh_ids[i-1].end {
+            overlaps_found = true;
+            fresh_ids[i].start = fresh_ids[i-1].start;
+            fresh_ids[i-1].start = 0;
+            fresh_ids[i-1].end = 0;
+        }
+    }
+
+    // create new vector with out the zeros
+    let mut freshies: Vec<IdRange> = Vec::new();
+    for rng in fresh_ids {
+        if rng.start != 0 && rng.end != 0 {
+            freshies.push(rng);
+        }
+    }
+
+    (freshies, overlaps_found)
+}
+
 #[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
@@ -55,108 +92,64 @@ pub fn part_two(input: &str) -> u64 {
     // parse input
     let lines = input.lines().collect::<Vec<&str>>();
 
-    let mut fresh_id_rngs: Vec<(u64, u64)> = lines
+    let mut fresh_ids: Vec<IdRange> = lines
         .clone()
         .iter()
         .filter(|x| x.contains("-"))
         .map(|x| x.split_once("-").unwrap())
         .collect::<Vec<(&str, &str)>>()
         .iter()
-        .map(|(x, y)| (x.parse().unwrap(), y.parse().unwrap()))
+        .map(|(x, y)| 
+            IdRange{ start: x.parse().unwrap(), end: y.parse().unwrap()}
+        )
         .collect();
 
-    // sort the id ranges in order of lowest to highest range end value
-    for i in 0..fresh_id_rngs.len() {
-        for j in i..fresh_id_rngs.len() {
-            if fresh_id_rngs[i].1 > fresh_id_rngs[j].1 
-            || (fresh_id_rngs[i].1 == fresh_id_rngs[j].1 && fresh_id_rngs[i].0 > fresh_id_rngs[j].1) {
-                fresh_id_rngs.swap(i, j);
+    println!("unsorted");
+    for rng in &fresh_ids {
+        println!("{:?}", rng);
+    }
+    println!("unsorted\n");
+
+
+    // sort the id ranges in order of lowest to highest range START value
+    for i in 0..fresh_ids.len() {
+        for j in i..fresh_ids.len() {
+            if fresh_ids[i].start > fresh_ids[j].start {
+                fresh_ids.swap(i, j);
             } 
         }
     }
 
-    // find highest end id value for use as seed
-    let seed_rng: (u64, u64) = fresh_id_rngs[fresh_id_rngs.len()-1];
-    // for (start, end) in &fresh_id_rngs {
-    //     if end > &seed_rng.1 {
-    //         seed_rng = (*start, *end);
-    //     }
-    // }
-
-    // initialise fresh_id vector
-    // seed with the highest ending range from ranges input
-    let mut fresh_ids: VecDeque<(u64, u64)> = VecDeque::from([seed_rng]);
-
-    for (try_start, try_end) in &fresh_id_rngs {
-        // is the rng a subset of a range already in the fresh_ids vector
-        // loop through fresh_ids
-        for idx in 0..fresh_ids.len() {
-            // start and end of range
-            // println!("try range: ({:?}, {:?})", try_start, try_end);
-            let f_st = fresh_ids[idx].0;
-            let f_end = fresh_ids[idx].1;
-            // println!("fresh range: ({:?}, {:?})", f_st, f_end);
-
-            // range before
-            if try_end < &f_st {
-                // add new range before current range
-                let insert_point = if idx == 0 {0} else {idx};
-                fresh_ids.insert(insert_point, (*try_start, *try_end));
-                break;
-            }
-
-            // range start overlaps
-            if try_start <= &f_st && try_end >= &f_st && try_end <= &f_end {
-                // update current fresh range
-                fresh_ids[idx].0 = *try_start;
-                break;
-            }
-
-            // range end overlaps
-            if try_start >= &f_st && try_start <= &f_end && try_end >= &f_end {
-                // update current fresh range
-                fresh_ids[idx].1 = *try_end;
-                break;
-            }
-
-        }
+    println!("sorted");
+    for rng in &fresh_ids {
+        println!("{:?}", rng);
     }
+    println!("sorted\n");
 
-    // if seed value highest value is equal to the next highest end range 
-    // remove seed
-    if seed_rng.1 == fresh_ids[fresh_ids.len()-2].1 {
-        fresh_ids.pop_back();
+    // filter out overlaps
+    let mut overlaps_found = true;
+    let mut freshies: Vec<IdRange> = fresh_ids.clone();
+    while overlaps_found {
+        (freshies, overlaps_found) = filter_ranges(freshies);
     }
-
-    // loop though to check for overlaps
-    for i in 0..fresh_ids.len()-1 {
-        for j in i+1..fresh_ids.len() {
-            // if the end value of current index >= start value of next index
-            if fresh_ids[i].1 >= fresh_ids[j].0 {
-                fresh_ids[j].0 = fresh_ids[i].0;
-                fresh_ids.pop_front();
-                break;
-            } 
-        }
-    }
-
-    println!("{:?}", fresh_ids);
-
-    // sum the ranges we have 
-    let mut fresh_id_count = 0;
-    for (st, end) in fresh_ids {
-        println!("Counting ==> ({}, {})", st,end);
-        fresh_id_count += (end-st) + 1;
-    }
-
     
-    fresh_id_count
+    // check for overlaps
+    for i in 1..freshies.len() {
+        if freshies[i].start < freshies[i-1].end {
+            panic!("overlap found at index {}\n{:?}\n{:?}\n", i, freshies[i-1], freshies[i]);
+        }
+    }
+
+    // sum ranges
+    let mut total: u64 = 0;
+    for rng in freshies {
+        println!("{:?}", rng);
+        total += rng.end - rng.start + 1;
+    }
+    
+    total
 }
-// 357429003954601
-// 382855926026596
-// 334949527076567 too high
-// 172249655347656
-// 316191919545416
+
 
 #[cfg(test)]
 mod tests {
@@ -186,6 +179,13 @@ mod tests {
         let input = fs::read_to_string("data/examples/05.txt")
         .expect("Should have been able to read the file");
         assert_eq!(part_two(&input), 14);
+    }
+
+    #[test]
+    fn part_two_example2_input() {
+        let input = fs::read_to_string("data/examples/05 copy.txt")
+        .expect("Should have been able to read the file");
+        assert_eq!(part_two(&input), 24);
     }
 
 
