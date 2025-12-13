@@ -173,13 +173,15 @@ pub fn part_two(input: &str) -> u64 {
     // ---> if splitter update beam in updated_beams vec
 
     for row in 0..arr.len() {
-        // beam down on beams vec
-        let updated_beams = move_beams_down(beams);
         // check corresponding arr character for beam position
-        let split_beams = split_beams(updated_beams, arr[row].clone());
+        if row % 2 == 0 {
+            beams = split_beams(beams, arr[row].clone());
+        }
+        
+        // move to next row
+        beams = move_beams_down(beams);
         
         // update original beams
-        beams = split_beams;
         println!("row: {:?}", row);
         println!("number of beams: {:?}", beams.len());
     }
