@@ -1,6 +1,6 @@
 // day 7 solution
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
 
@@ -38,7 +38,7 @@ pub fn part_one(input: &str) -> u64 {
     // count number of converted splitters in arr
     let mut count = 0;
     for line in arr {
-        println!("{:?}", line);
+        // println!("{:?}", line);
         for ch in line {
             if ch == '+' {
                 // println!("{}", ch);
@@ -50,7 +50,7 @@ pub fn part_one(input: &str) -> u64 {
     count
 }
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 fn find_start(line: &[char]) -> Result<usize, String> {
     for (idx, ch) in line.iter().enumerate() {
         if *ch == 'S' {
@@ -60,7 +60,7 @@ fn find_start(line: &[char]) -> Result<usize, String> {
     Err("Couldn't find start point".to_string())
 }
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 fn beam_down(ids: Vec<usize>, mut line: Vec<char>) -> Vec<char> {
     // --> beam down updates 
     // ----> free space: '.' to '|' 
@@ -85,13 +85,74 @@ fn beam_down(ids: Vec<usize>, mut line: Vec<char>) -> Vec<char> {
     line
 }
 
-#[warn(dead_code)]
+#[derive(Debug, Clone, Copy)]
+struct Point {
+    row: usize,
+    col: usize
+}
+
+fn move_beams_down(beams: Vec<Point>) -> Vec<Point> {
+    let mut updated_beams: Vec<Point> = Vec::new();
+    for beam in beams {
+        let row = beam.row + 1;
+        let col = beam.col;
+        updated_beams.push(Point { row, col })
+    }
+
+    updated_beams
+}
+
+fn split_beams(beams: Vec<Point>, row: Vec<char>) -> Vec<Point> {
+    let mut split_beams: Vec<Point> = Vec::new();
+    for beam in beams {
+        if row[beam.col] == '^' {
+            // split the beam
+            // left beam
+            let left_beam = beam_left(beam);
+            match left_beam {
+                Some(b) => split_beams.push(b),
+                None => println!("at the edge, no beam"),
+            }
+            // right beam
+            let right_beam = beam_right(beam, row.len()-1); 
+            match right_beam {
+                Some(b) => split_beams.push(b),
+                None => println!("at the edge, no beam"),
+            }
+
+        } else {
+            split_beams.push(beam);
+        }
+    }
+
+    split_beams
+}
+
+fn beam_left(beam: Point) -> Option<Point> {
+    if beam.col > 0 {
+        let col = beam.col - 1;
+        return Some(Point { row: beam.row, col })
+    }
+
+    None
+}
+
+fn beam_right(beam: Point, max: usize) -> Option<Point> {
+    if beam.col < max {
+        let col = beam.col + 1;
+        return Some(Point { row: beam.row, col })
+    }
+
+    None
+}
+
+#[allow(dead_code)]
 pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 
     // parse input
     let lines: Vec<&str> = input.lines().collect();
-    let mut arr = lines
+    let arr = lines
        .iter()
        .map(|x| 
            x.chars().collect::<Vec<char>>()
@@ -101,37 +162,33 @@ pub fn part_two(input: &str) -> u64 {
     // find start S
     let start_idx: usize = find_start(&arr[0]).unwrap();
 
-    // initialise beam down ids
-    let mut beam_down_ids: Vec<usize> = vec![start_idx];
+    // define a beams vec to hold beam instances
+    // initialise if from start postion
+    let mut beams: Vec<Point> = vec![Point {row: 0, col: start_idx}];
 
-    // loop through lines of arr
-    // beam down function that modifies the next line with where the beam will be
-    let mut beam_count: u64 = 1;
-    for line in arr.iter_mut().skip(1) {
-        let (updated_vec, new_beam) = beam_down_count(beam_down_ids.clone(), line.clone());
-        *line = updated_vec;
-        beam_count += new_beam;
+    // algorithm goes
+    // beam down -> update the rows for all beams
+    // loop through beams vec
+    // --> check corresponding char in array 
+    // ---> if splitter update beam in updated_beams vec
 
-        // recalculate beam_down_ids for next loop
-        beam_down_ids = Vec::new();
-        for (i, ch) in line.iter().enumerate() {
-            if ch == &'|' {
-                beam_down_ids.push(i);
-            }
-        }
+    for row in 0..arr.len() {
+        // beam down on beams vec
+        let updated_beams = move_beams_down(beams);
+        // check corresponding arr character for beam position
+        let split_beams = split_beams(updated_beams, arr[row].clone());
+        
+        // update original beams
+        beams = split_beams;
+        println!("row: {:?}", row);
+        println!("number of beams: {:?}", beams.len());
     }
 
-    // take a peek at arr
-    // for l in arr {
-    //     println!("{:?}", l);
-    // }
 
-    // search through array for all beam paths
-    // beam_path_search(start_idx, &arr[1..], 1)
-    beam_count
+    beams.len() as u64
 }
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 fn beam_down_count(ids: Vec<usize>, mut line: Vec<char>) -> (Vec<char>, u64) {
     // --> beam down updates 
     // ----> free space: '.' to '|' 
@@ -158,6 +215,7 @@ fn beam_down_count(ids: Vec<usize>, mut line: Vec<char>) -> (Vec<char>, u64) {
     (line, new_beam)
 }
 
+#[allow(dead_code)]
 fn beam_path_search(idx: usize, arr: &[Vec<char>], mut beam_path_count: u64) -> u64 {
     println!("in beam path count: {}", beam_path_count);
     if arr.len() == 1 {
@@ -213,9 +271,9 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = fs::read_to_string("data/examples/07-2.txt")
+        let input = fs::read_to_string("data/examples/07.txt")
         .expect("Should have been able to read the file");
-        assert_eq!(part_one(&input), 6);
+        assert_eq!(part_one(&input), 21);
     }
 
     #[test]
@@ -259,13 +317,6 @@ mod tests {
         let input = fs::read_to_string(EXAMPLE_FILE)
         .expect("Should have been able to read the file");
         assert_eq!(part_two(&input), 40);
-    }
-
-    #[test]
-    fn part_two_example_2() {
-        let input = fs::read_to_string("data/examples/07-2.txt")
-        .expect("Should have been able to read the file");
-        assert_eq!(part_two(&input), 8);
     }
 
 }

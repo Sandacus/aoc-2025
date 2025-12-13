@@ -10,6 +10,7 @@ struct Point {
     z: f32
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 #[derive(Debug)]
 struct Connection {
@@ -17,6 +18,7 @@ struct Connection {
     dist: f32
 }
 
+#[allow(dead_code)]
 impl Connection {
     #[warn(dead_code)]
     fn new(p1: Point, p2: Point) -> Self {
@@ -26,13 +28,14 @@ impl Connection {
     }
 }
 
+#[allow(dead_code)]
 struct Circuit {
     conns: Vec<Connection>,
     len: u64
 }
 
+#[allow(dead_code)]
 impl Circuit {
-    #[warn(dead_code)]
     fn new(conns: Vec<Connection>) -> Self {
         let len = conns.len() as u64;
         Self { conns, len}
@@ -42,6 +45,7 @@ impl Circuit {
 
 
 // calculate distance between two points
+#[allow(dead_code)]
 fn calcualte_distance(p1: &Point, p2: &Point) -> f32 {
     let dx = (p1.x - p2.x) * (p1.x - p2.x);
     let dy = (p1.y - p2.y) * (p1.y - p2.y);
@@ -50,6 +54,7 @@ fn calcualte_distance(p1: &Point, p2: &Point) -> f32 {
     (dx + dy + dz).sqrt()
 }
 
+#[allow(dead_code)]
 fn update_connections(mut conns: Vec<Connection>, con: &Connection) -> Vec<Connection> {
     for idx in 0..conns.len() {
         if con.dist > conns[idx].dist {
@@ -61,7 +66,7 @@ fn update_connections(mut conns: Vec<Connection>, con: &Connection) -> Vec<Conne
     conns
 }
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 pub fn part_one(input: &str) -> u64 {
     println!("Solving part 1!");
 
@@ -108,7 +113,7 @@ pub fn part_one(input: &str) -> u64 {
     42
 }
 
-#[warn(dead_code)]
+#[allow(dead_code)]
 pub fn part_two(_input: &str) -> u64 {
     println!("Solving part 2!");
 
