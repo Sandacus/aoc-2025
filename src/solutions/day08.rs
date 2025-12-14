@@ -14,34 +14,21 @@ struct Point {
 #[derive(Clone)]
 #[derive(Debug)]
 struct Connection {
-    pair: (Point, Point),
+    id: (usize, usize),
+    p1: Point,
+    p2: Point,
     dist: f32
 }
 
 #[allow(dead_code)]
 impl Connection {
-    #[warn(dead_code)]
-    fn new(p1: Point, p2: Point) -> Self {
+    fn new(box1: (Point, usize), box2: (Point, usize)) -> Self {
+        let id: (usize, usize) = (box1.1, box2.1);
+        let (p1, p2) = (box1.0, box2.0);
         let dist = calcualte_distance(&p1, &p2);
-        let p = (p1, p2);
-        Self { pair: p, dist }
+        Self { id, p1, p2, dist }
     }
 }
-
-#[allow(dead_code)]
-struct Circuit {
-    conns: Vec<Connection>,
-    len: u64
-}
-
-#[allow(dead_code)]
-impl Circuit {
-    fn new(conns: Vec<Connection>) -> Self {
-        let len = conns.len() as u64;
-        Self { conns, len}
-    }
-}
-
 
 
 // calculate distance between two points
@@ -55,11 +42,16 @@ fn calcualte_distance(p1: &Point, p2: &Point) -> f32 {
 }
 
 #[allow(dead_code)]
-fn update_connections(mut conns: Vec<Connection>, con: &Connection) -> Vec<Connection> {
-    for idx in 0..conns.len() {
-        if con.dist > conns[idx].dist {
-            conns.remove(idx);
-            conns.push(con.clone());
+fn add_connections(mut conns: Vec<Connection>, con: &Connection) -> Vec<Connection> {
+    if conns.len() < 10 {
+        conns.push(con.clone());
+    } else {
+        for (i, old_con) in conns.clone().into_iter().enumerate() {
+            if con.dist > old_con.dist {
+                conns.remove(i);
+                conns.insert(i, con.clone());
+                break;
+            } 
         }
     }
 
@@ -88,26 +80,20 @@ pub fn part_one(input: &str) -> u64 {
         .map(|v| Point{x: v[0], y:v[1], z: v[2]})
         .collect::<Vec<Point>>();
 
-    // let delta = calcualte_distance(&points[0], &points[1]);
-    // println!("{:?}\n{:?} \ndistance: {:.0}", points[0], points[1], delta);
-
     // for the points add connections
     // only keep the top 10 shortest connections
     let mut conns: Vec<Connection> = Vec::new();
-    for i in 0..points.len()-1 {
-        for j in i+1..points.len() {
-            let p1 = points[i].clone();
-            let p2 = points[j].clone();
-            let con = Connection::new(p1, p2);
-            if conns.len() < 10 {
-                conns.push(con);
-            } else {
-                conns = update_connections(conns, &con);
-            }
+    for (i, p1) in points.iter().enumerate() {
+        for (j, p2) in points.iter().enumerate().skip(i+1) {
+            let con: Connection = Connection::new((p1.clone(), i), (p2.clone(), j));
+            conns = add_connections(conns, &con);
         }
     }
 
-    println!("conns: {:?}", conns);
+    println!("Print connections");
+    for con in conns {
+        println!("conns: {:?}", con.id);
+    }
 
 
     42
@@ -157,10 +143,27 @@ mod tests {
     #[test]
     fn test_connection_struct() {
         let p1: Point = Point {x: 1.0, y: 2.0, z: 3.0};
+        let p1_id: usize = 1;
         let p2: Point = Point {x: 2.0, y: 1.0, z: 2.0};
-        let conn = Connection::new(p1, p2);
+        let p2_id: usize = 2;
+        let conn = Connection::new((p1, p1_id), (p2, p2_id));
         assert_eq!(conn.dist, (3.0_f32).sqrt());
-        assert_eq!(conn.pair, (Point {x: 1.0, y: 2.0, z: 3.0}, Point {x: 2.0, y: 1.0, z: 2.0}));
+        assert_eq!(conn.id, (1,2));
+        assert_eq!(conn.p1, Point {x: 1.0, y: 2.0, z: 3.0});
+        assert_eq!(conn.p2, Point {x: 2.0, y: 1.0, z: 2.0});
+    }
+
+    #[test]
+    fn test_add_connection() {
+        let p1: Point = Point {x: 1.0, y: 2.0, z: 3.0};
+        let p1_id: usize = 1;
+        let p2: Point = Point {x: 2.0, y: 1.0, z: 2.0};
+        let p2_id: usize = 2;
+        let con = Connection::new((p1, p1_id), (p2, p2_id));
+        let mut conns: Vec<Connection> = Vec::new();
+        conns = add_connections(conns, &con);
+        
+        assert_eq!(conns.len(), 1);
     }
 
     #[test]
