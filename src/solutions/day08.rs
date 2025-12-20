@@ -1,6 +1,6 @@
 // day 8 solution
 
-const NUMBER_OF_PAIRS: usize = 1_000;
+const NUMBER_OF_PAIRS: usize = 1000;
 
 // point struct
 #[derive(Debug)]
@@ -97,14 +97,7 @@ pub fn part_one(input: &str) -> u64 {
         }
     }
 
-    // println!("Print connections");
-    // for con in &conns {
-        // println!("conns: {:?}", con.id);
-    // }
-
     // sort connections into circuits
-    // initialise with first two connected points
-    // let mut circuits: Vec<Vec<usize>> = vec![vec![conns[0].id.0, conns[0].id.1]];
     let mut circuits: Vec<Vec<usize>> = Vec::new();
     // start looping through connections
     for i in 0..conns.len() {
@@ -131,21 +124,42 @@ pub fn part_one(input: &str) -> u64 {
         }
     }
 
+    // check for connected circuits
+    for i in 0..circuits.len()-1 {
+        for j in i+1..circuits.len() {
+            for p in circuits[i].clone() {
+                if circuits[j].contains(&p) {
+                    println!("\noverlap found!\n");
+                    // add all items from i to j, so that they carry forward with overlap search
+                    for i_p in circuits[i].clone() {
+                        if !circuits[j].contains(&i_p) {
+                            circuits[j].push(i_p);
+                        }
+                    }
+                    // set circuit i to zero
+                    circuits[i] = Vec::new();
+                }
+            }
+        }
+    }
+
     println!("Print circuits\n");
     let mut first: u64 = 0;
     let mut second: u64 = 0;
     let mut third: u64 = 0;
     for c in circuits {
-        println!("circuit: {:?}", c);
         if c.len() as u64 >= first {
             third = second;
             second = first;
             first = c.len() as u64;
+            println!("first: {:?}, second: {}, third: {}", first, second, third);
         } else if c.len() as u64 >= second {
             third = second;
             second = c.len() as u64;
+            println!("first: {:?}, second: {}, third: {}", first, second, third);
         } else if c.len() as u64 > third {
             third = c.len() as u64;
+            println!("first: {:?}, second: {}, third: {}", first, second, third);
         }
     }
     
@@ -153,7 +167,6 @@ pub fn part_one(input: &str) -> u64 {
     first * second * third
 }
 
-// 4590 - too low
 
 #[allow(dead_code)]
 pub fn part_two(_input: &str) -> u64 {
