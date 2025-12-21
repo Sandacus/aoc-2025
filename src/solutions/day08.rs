@@ -1,6 +1,7 @@
 // day 8 solution
 
-const NUMBER_OF_PAIRS: usize = 1000;
+const FIRST_1000: usize = 1_000;
+const NUMBER_OF_PAIRS: usize = 10_000;
 
 // point struct
 #[derive(Debug)]
@@ -45,7 +46,7 @@ fn calcualte_distance(p1: &Point, p2: &Point) -> f32 {
 
 #[allow(dead_code)]
 fn add_connections(mut conns: Vec<Connection>, con: Connection) -> Vec<Connection> {
-    if conns.len() < NUMBER_OF_PAIRS {
+    if conns.len() < FIRST_1000 {
         conns.push(con.clone());
     } else {
         // find longest distance
@@ -168,11 +169,136 @@ pub fn part_one(input: &str) -> u64 {
 }
 
 
+fn add_connections_part2(mut conns: Vec<Connection>, con: Connection) -> Vec<Connection> {
+    if conns.len() < NUMBER_OF_PAIRS {
+        conns.push(con.clone());
+    } else {
+        // find longest distance
+        let mut idx_longest = 0;
+        for (i, c) in conns.iter().enumerate().skip(1) {
+            if c.dist > conns[idx_longest].dist {
+                idx_longest = i;
+            }
+        }
+
+        // update conns vector
+        if con.dist < conns[idx_longest].dist {
+            conns.remove(idx_longest);
+            conns.push(con);
+        }
+    }
+
+    conns
+}
+
+
 #[allow(dead_code)]
-pub fn part_two(_input: &str) -> u64 {
+pub fn part_two(input: &str) -> u64 {
     println!("Solving part 2!");
 
+        // parse input
+    let lines = input.lines().collect::<Vec<&str>>();
+    
+    // get vec of points
+    let points: Vec<Point> = lines
+        .iter()
+        .map(|x| {
+            x.split(",")
+            .collect::<Vec<&str>>()
+            .iter()
+            .map(|x| x.parse::<f32>().unwrap())
+            .collect::<Vec<f32>>()
+        })
+        .collect::<Vec<Vec<f32>>>()
+        .iter()
+        .map(|v| Point{x: v[0], y:v[1], z: v[2]})
+        .collect::<Vec<Point>>();
+
+    // for the points add connections
+    let mut conns: Vec<Connection> = Vec::new();
+    for (i, p1) in points.iter().enumerate() {
+        for (j, p2) in points.iter().enumerate().skip(i+1) {
+            let con: Connection = Connection::new((p1.clone(), i), (p2.clone(), j));
+            conns = add_connections_part2(conns, con);
+        }
+    }
+
+    // sort connections into circuits
+    let mut circuits: Vec<Vec<usize>> = Vec::new();
+    // start looping through connections
+    for i in 0..conns.len() {
+        let p1: &usize = &conns[i].id.0;
+        let p2: &usize = &conns[i].id.1;
+        let mut circuit_found = false;
+        for j in 0..circuits.len() {
+            // check if p1 or p2 in circuit
+            if circuits[j].contains(p1) && !circuits[j].contains(p2) {
+                circuits[j].push(*p2);
+                circuit_found = true;
+                break;
+            } else if circuits[j].contains(p2) && !circuits[j].contains(p1) {
+                circuits[j].push(*p1);
+                circuit_found = true;
+                break;
+            } else if circuits[j].contains(p2) && circuits[j].contains(p1) {
+                circuit_found = true;
+                break;
+            }
+        }
+        if !circuit_found {
+            circuits.push(vec![*p1, *p2]);
+        }
+    }
+
+    // check for connected circuits
+    for i in 0..circuits.len()-1 {
+        for j in i+1..circuits.len() {
+            for p in circuits[i].clone() {
+                if circuits[j].contains(&p) {
+                    // println!("\noverlap found!\n");
+                    // add all items from i to j, so that they carry forward with overlap search
+                    for i_p in circuits[i].clone() {
+                        if !circuits[j].contains(&i_p) {
+                            circuits[j].push(i_p);
+                        }
+                    }
+                    // set circuit i to zero
+                    circuits[i] = Vec::new();
+                }
+            }
+        }
+    }
+
+    println!("Print circuits\n");
+    
+    for c in circuits {
+        if c.len() == 1000 {
+            println!("circuit point at 1000: {:?}", c[c.len()-1]);
+            let idx: usize = c[c.len()-1];
+            // let p = &points[idx];
+            // find connection with this point in it
+            return find_connection(idx, conns);
+
+        }
+    }
+
+    
+
     42
+}
+
+
+fn find_connection(idx: usize, conns: Vec<Connection>) -> u64 {
+    let mut x1 = 0.0;
+    let mut x2 = 0.0;
+    for con in conns {
+        if con.id.0 == idx || con.id.1 == idx {
+            x1 = con.p1.x;
+            x2 = con.p2.x;
+        }
+    }
+
+    (x1 * x2) as u64
 }
 
 
