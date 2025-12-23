@@ -101,21 +101,21 @@ pub fn part_one(input: &str) -> u64 {
     // sort connections into circuits
     let mut circuits: Vec<Vec<usize>> = Vec::new();
     // start looping through connections
-    for i in 0..conns.len() {
-        let p1: &usize = &conns[i].id.0;
-        let p2: &usize = &conns[i].id.1;
+    for c in conns.iter() {
+        let p1: &usize = &c.id.0;
+        let p2: &usize = &c.id.1;
         let mut circuit_found = false;
-        for j in 0..circuits.len() {
+        for circuit in circuits.iter_mut() {
             // check if p1 or p2 in circuit
-            if circuits[j].contains(p1) && !circuits[j].contains(p2) {
-                circuits[j].push(*p2);
+            if circuit.contains(p1) && !circuit.contains(p2) {
+                circuit.push(*p2);
                 circuit_found = true;
                 break;
-            } else if circuits[j].contains(p2) && !circuits[j].contains(p1) {
-                circuits[j].push(*p1);
+            } else if circuit.contains(p2) && !circuit.contains(p1) {
+                circuit.push(*p1);
                 circuit_found = true;
                 break;
-            } else if circuits[j].contains(p2) && circuits[j].contains(p1) {
+            } else if circuit.contains(p2) && circuit.contains(p1) {
                 circuit_found = true;
                 break;
             }
@@ -226,21 +226,21 @@ pub fn part_two(input: &str) -> u64 {
     // sort connections into circuits
     let mut circuits: Vec<Vec<usize>> = Vec::new();
     // start looping through connections
-    for i in 0..conns.len() {
-        let p1: &usize = &conns[i].id.0;
-        let p2: &usize = &conns[i].id.1;
+    for c in conns.iter() {
+        let p1: &usize = &c.id.0;
+        let p2: &usize = &c.id.1;
         let mut circuit_found = false;
-        for j in 0..circuits.len() {
+        for circuit in circuits.iter_mut() {
             // check if p1 or p2 in circuit
-            if circuits[j].contains(p1) && !circuits[j].contains(p2) {
-                circuits[j].push(*p2);
+            if circuit.contains(p1) && !circuit.contains(p2) {
+                circuit.push(*p2);
                 circuit_found = true;
                 break;
-            } else if circuits[j].contains(p2) && !circuits[j].contains(p1) {
-                circuits[j].push(*p1);
+            } else if circuit.contains(p2) && !circuit.contains(p1) {
+                circuit.push(*p1);
                 circuit_found = true;
                 break;
-            } else if circuits[j].contains(p2) && circuits[j].contains(p1) {
+            } else if circuit.contains(p2) && circuit.contains(p1) {
                 circuit_found = true;
                 break;
             }
@@ -270,25 +270,29 @@ pub fn part_two(input: &str) -> u64 {
     }
 
     println!("Print circuits\n");
-    
+
+    let mut ans: Result<u64, String>;
+    ans = Err("Can't find a fully connected circuit!".to_string());
     for c in circuits {
         if c.len() == 1000 {
             println!("circuit point at 1000: {:?}", c[c.len()-1]);
             let idx: usize = c[c.len()-1];
             // let p = &points[idx];
             // find connection with this point in it
-            return find_connection(idx, conns);
+            // return find_connection(idx, conns);
+            ans = Ok(find_connection(idx, &conns));
 
         }
     }
 
-    
-
-    42
+    match ans {
+        Ok(a) => a,
+        Err(e) => panic!("{}", e),
+    }
 }
 
 
-fn find_connection(idx: usize, conns: Vec<Connection>) -> u64 {
+fn find_connection(idx: usize, conns: &Vec<Connection>) -> u64 {
     let mut x1 = 0.0;
     let mut x2 = 0.0;
     for con in conns {
@@ -362,7 +366,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn part_two_example_input() {
         let input = fs::read_to_string(EXAMPLE_FILE)
         .expect("Should have been able to read the file");
