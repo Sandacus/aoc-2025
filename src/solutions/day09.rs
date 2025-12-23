@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 
+#[derive(Clone, Copy, Debug)]
 struct Point {
     x: i64,
     y: i64
@@ -54,7 +55,7 @@ pub fn part_one(input: &str) -> u64 {
     let mut area = 0;
 
     for i in 0..points.len()-2 {
-        for j in 0..points.len()-1 {
+        for j in i+1..points.len()-1 {
             let area_option = get_area(&points[i], &points[j]);
 
             match area_option {
@@ -110,23 +111,45 @@ fn get_valid_y_ranges(points: &[Point]) -> HashMap<i64, Range> {
     y_ranges
 }
 
-fn check_point_valid(p: &Point, x_ranges: &HashMap<i64, Range>, y_ranges: &HashMap<i64, Range>) -> bool {
-    // check x first
-    // -> is y in the keys for x_range?
-    // -> is x_min <= x <= x_max?
-    match x_ranges.get(&p.y) {
-        None => return false,
-        Some(rng) => if p.x < rng.min || p.x > rng.max {return false;},
-    }
-    // check y
-    // -> is x in the keys for y_range?
-    // -> is y_min <= y <= y_max?
-    match y_ranges.get(&p.x) {
-        None => return false,
-        Some(rng) => if p.y < rng.min || p.y > rng.max {return false;},
+fn check_rectangle_valid(p1: &Point, p2: &Point, valid_points: &HashMap<i64, Range>) -> bool {
+    // construct array of opposite corners
+    let (c1, c2) = (Point{ x: p1.x, y: p2.y }, Point{ x: p2.x, y: p1.y });
+
+    // check c1
+    let v1 = match valid_points.get(&c1.y) {                                        
+        None => false,                                           // -> is y in the keys for x_range?
+        Some(rng) => c1.x >= rng.min && c1.x <= rng.max, // -> is x_min <= x <= x_max?
+    };
+    // check c2
+    let v2 = match valid_points.get(&c2.y) {                                        
+        None => false,                                           // -> is y in the keys for x_range?
+        Some(rng) => c2.x >= rng.min && c2.x <= rng.max, // -> is x_min <= x <= x_max?
+    };
+    
+    v1 && v2
+}
+
+fn get_valid_map(x_ranges: &HashMap<i64, Range>, y_ranges: &HashMap<i64, Range>, points: &[Point]) -> HashMap<i64, Range>{
+    // use the x_ranges and y_ranges to find all tiles that are valid and add to the points vector
+    // e.g., for y=1: x_min= 1, x_max=5 ==> add points (2,1), (3,1), (4,1) to the points vector
+    
+    let mut allowed_points: Vec<Point> = points.to_vec();
+    // add points from x_ranges
+    for (y, x_rng) in x_ranges {
+        for x in x_rng.min+1..x_rng.max {
+            allowed_points.push(Point{x, y:*y});
+        }
     }
     
-    true
+    // add points from y_ranges
+    for (x, y_rng) in y_ranges {
+        for y in y_rng.min+1..y_rng.max {
+            allowed_points.push(Point{x:*x, y});
+        }
+    }
+
+    // now, recalculate valid ranges from allowed points
+    get_valid_x_ranges(&allowed_points)
 }
 
 
@@ -139,28 +162,41 @@ pub fn part_two(input: &str) -> u64 {
 
     // create valid x ranges
     let x_ranges = get_valid_x_ranges(&points);
+    // for (k, v) in &x_ranges {
+    //     println!("for y: {}, the valid x: {:?}", k, v);
+    // }
 
     // create valid y ranges
     let y_ranges = get_valid_y_ranges(&points);
+    // for (k, v) in &y_ranges {
+    //     println!("for x: {}, the valid y: {:?}", k, v);
+    // }
+
+    // now, recalculate valid ranges from allowed points
+    let valid_map = get_valid_map(&x_ranges, &y_ranges, &points);
 
     // check pairs of points
     let mut area: i64 = 0;
     for i in 0..points.len()-2 {
-        for j in 0..points.len()-1 {
+        for j in i+1..points.len()-1 {
             let (p1, p2) = (&points[i], &points[j]);
-            if check_point_valid(p1, &x_ranges, &y_ranges) 
-            && check_point_valid(p2, &x_ranges, &y_ranges)
-            && let Some(a) = get_area(p1, p2) { 
+
+            if check_rectangle_valid(p1, p2, &valid_map) 
+            && let Some(a) = get_area(p1, p2)  
+            && a > area {
                 area = a;
             }
+            
         }
     }
-
 
     
     area as u64
 }
-// 340 - too low
+//        340 - too low
+//     689788 - too low
+// 4771508457 - too high
+// 4620005060 - incorrect
 
 #[cfg(test)]
 mod tests {
@@ -222,7 +258,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn part_two_example_input() {
         let input = fs::read_to_string(EXAMPLE_FILE)
         .expect("Should have been able to read the file");
@@ -263,6 +298,59 @@ mod tests {
         // min, max @ y=0
         assert_eq!(y_rng.get(&0), Some(&Range{min: 1, max: 43}));
         assert_eq!(y_rng.get(&6), Some(&Range{min: 4, max: 33}));
+    }
+
+    #[test]
+    fn test_check_point_is_valid() {
+        // valid map based on the example
+        let mut valid_map: HashMap<i64, Range> = HashMap::new();
+        valid_map.insert(1, Range { min: 7, max:11 });
+        valid_map.insert(2, Range { min: 7, max: 11 });
+        valid_map.insert(3, Range { min: 2, max: 11 });
+        valid_map.insert(4, Range { min: 2, max: 11 });
+        valid_map.insert(5, Range { min: 2, max: 11 });
+        valid_map.insert(6, Range { min: 9, max: 11 });
+        valid_map.insert(7, Range { min: 9, max: 11 });
+
+        // valid pair (p1, p2)
+        let p1 = Point{ x: 9, y: 5 };
+        let p2 = Point{ x: 2, y: 3 };
+        assert!(check_rectangle_valid(&p1, &p2, &valid_map));
+        // invalid pair (p1, p3)
+        let p3 = Point{ x: 7, y: 1};
+        assert!(!check_rectangle_valid(&p2, &p3, &valid_map))
+    }
+
+    #[test]
+    fn test_making_valid_map() {
+        let p1 = Point{x: 7, y: 1};
+        let p2 = Point{x: 11, y: 1};    
+        let p3 = Point{x: 11, y: 7};
+        let p4 = Point{x: 9, y: 7};
+        let p5 = Point{x: 9, y: 5};
+        let p6 = Point{x: 2, y: 5};
+        let p7 = Point{x: 2, y: 3};
+        let p8 = Point{x: 7, y: 3};
+
+        let points = vec![p1, p2, p3, p4, p5, p6, p7, p8];
+
+        let x_rng = get_valid_x_ranges(&points); 
+        let y_rng = get_valid_y_ranges(&points);
+
+        let test_valid_map = get_valid_map(&x_rng, &y_rng, &points);
+
+        let mut valid_map: HashMap<i64, Range> = HashMap::new();
+        valid_map.insert(1, Range { min: 7, max:11 });
+        valid_map.insert(2, Range { min: 7, max: 11 });
+        valid_map.insert(3, Range { min: 2, max: 11 });
+        valid_map.insert(4, Range { min: 2, max: 11 });
+        valid_map.insert(5, Range { min: 2, max: 11 });
+        valid_map.insert(6, Range { min: 9, max: 11 });
+        valid_map.insert(7, Range { min: 9, max: 11 });
+
+        assert_eq!(test_valid_map, valid_map);
+
+        
     }
 
 }
