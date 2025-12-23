@@ -4,12 +4,12 @@ use crate::solutions::*;
 mod solutions;
 
 fn main() {
-    let input = fs::read_to_string("data/inputs/09.txt")
+    let input = fs::read_to_string("data/inputs/10.txt")
         .expect("Should have been able to read the file");
     
-    let part1 = day09::part_one(&input);
+    let part1 = day10::part_one(&input);
     println!("part 1 ans: {}", part1);
 
-    let part2 = day09::part_two(&input);
+    let part2 = day10::part_two(&input);
     println!("part 2 ans: {}", part2);
 }
