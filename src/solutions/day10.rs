@@ -8,16 +8,25 @@ pub fn part_one(input: &str) -> u64 {
     let lines: Vec<&str> = input.lines().collect();
 
     // get diagrams
+    let diagrams = get_diagrams(&lines);
 
     // get wiring
+    let wiring = get_wiring(&lines);
 
-    // get joltage
+    // algorithm
+    //
+    // loop through the diagrams
+    // for each diagram, calculate the buttons and number of times pressed
+    for (i, diagram) in diagrams.iter().enumerate() {
+        let _presses = calculate_presses(diagram, &wiring[i]);
+    }
+
 
 
    42
 }
 
-fn get_diagrams(lines: Vec<&str>) -> Vec<Vec<char>> {
+fn get_diagrams(lines: &Vec<&str>) -> Vec<Vec<char>> {
     lines
         .iter()
         .map(|x| 
@@ -26,7 +35,7 @@ fn get_diagrams(lines: Vec<&str>) -> Vec<Vec<char>> {
         .collect::<Vec<Vec<char>>>()
 }
 
-fn get_wiring(lines: Vec<&str>) -> Vec<Vec<Vec<u64>>> {
+fn get_wiring(lines: &Vec<&str>) -> Vec<Vec<Vec<u64>>> {
     lines
         .iter()
         .map(|x| 
@@ -40,6 +49,11 @@ fn get_wiring(lines: Vec<&str>) -> Vec<Vec<Vec<u64>>> {
                 .collect::<Vec<Vec<u64>>>()
         )
         .collect::<Vec<Vec<Vec<u64>>>>()
+}
+
+fn calculate_presses(_diagram: &[char], _wiring: &[Vec<u64>]) -> u64 {
+    // calculate the number of button presses for a diagram and wiring schematic
+    42
 }
 
 
@@ -82,7 +96,7 @@ mod tests {
             "[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}", 
             "[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}"];
         
-        let diagrams: Vec<Vec<char>> = get_diagrams(lines);
+        let diagrams: Vec<Vec<char>> = get_diagrams(&lines);
 
         let expected_diagrams0 = vec!['.', '#', '#', '.'];
         let expected_diagrams1 = vec!['.', '.', '.', '#', '.'];
@@ -99,7 +113,7 @@ mod tests {
             "[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}", 
             "[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}"];
         
-        let wiring = get_wiring(lines);
+        let wiring = get_wiring(&lines);
 
         let expected_wiring0 = vec![vec![3], vec![1,3], vec![2], vec![2,3], vec![0,2], vec![0,1]];
         let expected_wiring1 = vec![vec![0,2,3,4], vec![2,3], vec![0,4], vec![0,1,2], vec![1,2,3,4]];
@@ -108,6 +122,16 @@ mod tests {
         assert_eq!(wiring[0], expected_wiring0);
         assert_eq!(wiring[1], expected_wiring1);
         assert_eq!(wiring[2], expected_wiring2);
+    }
+
+    #[test]
+    fn test_calculate_button_presses() {
+        let diagram = vec!['.', '#', '#', '.'];
+        let wiring = vec![vec![3], vec![1,3], vec![2], vec![2,3], vec![0,2], vec![0,1]];
+
+        let presses = calculate_presses(&diagram, &wiring);
+
+        assert_eq!(presses, 2);
     }
 
     #[test]
