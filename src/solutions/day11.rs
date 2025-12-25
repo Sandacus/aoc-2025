@@ -10,9 +10,8 @@ pub fn part_one(input: &str) -> u64 {
 
     let map = get_device_outputs(&lines);
 
-    
 
-   42
+   count_outs("you", &map, 0)
 }
 
 fn get_device_outputs<'a>(lines: &[&'a str]) -> HashMap<&'a str, Vec<&'a str>> {
@@ -25,6 +24,25 @@ fn get_device_outputs<'a>(lines: &[&'a str]) -> HashMap<&'a str, Vec<&'a str>> {
     }
 
     map
+}
+
+fn count_outs(key: &str, map: &HashMap<&str, Vec<&str>>, mut count: u64) -> u64 {
+    let out = vec!["out"];
+    
+    if let Some(v) = map.get(key) {
+        if v == &out {
+            // todo
+            return count + 1;
+        } else {
+            //todo
+            // count += count_outs(v.iter().next().unwrap(), map, count);
+            for new_key in v.iter() {
+                count = count_outs(new_key, map, count);
+            }
+        }
+    }
+
+    count
 }
 
 
@@ -77,6 +95,23 @@ ccc: ddd eee fff".to_string();
         expected_map.insert("ccc", vec!["ddd", "eee", "fff"]);
 
         assert_eq!(map, expected_map);
+    }
+
+    #[test]
+    fn test_out_count() {
+        let mut map = HashMap::new();
+        map.insert("aaa", vec!["out"]);
+        map.insert("you", vec!["bbb", "ccc"]);
+        map.insert("bbb", vec!["ddd", "aaa"]);
+        map.insert("ccc", vec!["fff"]);
+        map.insert("ddd", vec!["aaa", "eee", "fff"]);
+        map.insert("eee", vec!["out"]);
+        map.insert("fff", vec!["out"]);
+
+        let out_count = count_outs("you", &map, 0);
+        let expected_out_count: u64 = 5;
+
+        assert_eq!(out_count, expected_out_count);
     }
 
     #[test]
